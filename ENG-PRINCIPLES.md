@@ -86,6 +86,10 @@
 
 - **ALWAYS gate on tests in BOTH GitHub CI and pre-push hooks.** Committing locally stays free and fast; the full gate runs once, when code is about to leave the machine (`pre-push`), and again as a required check before merge (CI). Document both gates in `CONTRIBUTING.md`.
 
+- **The gate passes with ZERO warnings — in debug AND release builds, and in the debug AND release TEST builds.** All four build flavors are warning-free, with the test code held to the same bar as the code it tests. For Rust that is `cargo clippy --workspace --all-targets -- -D warnings`, and the same command again with `--release` (`--all-targets` is what pulls the tests, benches, and examples in). A warning that survives one merge is background noise by the next; the only warning count that stays readable is zero.
+
+- **The gate NEVER publishes — but it ALWAYS proves that publishing would work.** If the repo has anything publishable (crates.io, PyPI, npm, …), releasing stays a deliberate human act, never a side effect of a green build. The gate instead runs the dry run of publishing — for Rust `cargo package --workspace`, which also resolves not-yet-published sibling crates against the locally built packages, so it works in the window after a version bump and before the release; for Python `python -m build` plus `twine check` — and requires it to BUILD and to be WARNING-FREE. A warning at packaging time means the published artifact would silently differ from the repo's intent (files that do not ship, targets that get dropped, metadata that does not validate), so it fails the gate exactly like a failing test.
+
 ## 4. Web
 
 - **Web UIs are 100% functional, neat-looking, and minimalistic.** No dead buttons, no decorative clutter. Every element does something.
