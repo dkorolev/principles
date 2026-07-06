@@ -82,6 +82,7 @@
   - **Deterministic where it can be, LLM-judged where it must be.** Mechanical checks run deterministically; an agent also judges the prose assertions, so the check *legitimately fails and blocks progress* when a rule is not actually satisfied.
   - **Verbose yet compact.** Written so humans understand it *and* LLMs spend fewer tokens and run faster — dense, not padded.
   - This doc only outlines the recommendation; the concrete mechanics are left to each end-user repo.
+  - **The human-perspective variant is codified in §12** — what a human must configure by hand, and the executable harness that proves that configuration sufficient.
 
 - **ALWAYS gate on tests in BOTH GitHub CI and pre-push hooks.** Committing locally stays free and fast; the full gate runs once, when code is about to leave the machine (`pre-push`), and again as a required check before merge (CI). Document both gates in `CONTRIBUTING.md`.
 
@@ -178,3 +179,13 @@
 - **Separate blocks with a blank line.** Every heading, paragraph, list, and code block is surrounded by blank lines, so structure survives every renderer and stays legible in raw form.
 
 - **Name Markdown files `UPPER-DASH-CASE.md`.** The stem is upper-case, dash-separated — `ARCHITECTURE.md`, `ENG-PRINCIPLES.md`, not `architecture.md` — and the `.md` extension stays lowercase. These files are load-bearing artifacts (executable harnesses per §3, docs, design notes); the shouting name makes them stand out in a file listing and signals "read this." (Conventional community filenames like `README.md`, `LICENSE`, `CONTRIBUTING.md` already follow this and are kept as-is.)
+
+## 12. Human Config & Skills
+
+- **Everything only a human can do lives in `HUMAN-CONFIG.md`.** Our tools forward credentials and configuration that already exist on the host; per §10 they never perform a login themselves. The repo therefore documents its human-only surface in one dedicated `HUMAN-CONFIG.md`: one section per external tool, each stating what to install, how to log in, what artifact the login leaves behind, and *precisely* what the software probes for — file paths, env vars, keychain items — matched to the code, never to wishful memory. Close the doc with a quick-verification table: one shell one-liner per tool, exit `0` meaning "this tool will be seen as available." Optional tools are marked optional; tools the software does not yet integrate are documented honestly as groundwork, never implied to work.
+
+- **Pair `HUMAN-CONFIG.md` with an executable human-perspective test.** A §3-style executable Markdown harness (e.g. `TEST-LOCAL-AGENTS-CREDENTIALS.md`) proves that what the human configured is *sufficient*: numbered steps run from a clean checkout, a **Predict** line per step stating the expected observable outcome, and a per-item **PASS / SKIPPED / FAIL** rubric plus an overall verdict. Configuration the human deliberately left out yields SKIPPED, never FAIL — the test measures sufficiency of what was set up, not completeness of everything that could be. The Markdown *is* the harness; helper scripts stay thin or absent.
+
+- **The human-perspective test is itself a skill.** Wire the same Markdown as a skill in the local repository, so any coding agent — on any harness — can execute it end to end and report the rubric. "Have your agent run `TEST-<WHAT>.md`" is the entire test-execution story, identical for a human following along, an agent invoked by hand, and a CI gate.
+
+- **Skills live once, under `.skills/`; harnesses reach them through symlink aliases.** Each skill is a self-contained directory — `.skills/<name>/SKILL.md` plus its scripts — complete on its own and deployable by copying that directory alone. The per-harness discovery locations (`.claude/skills`, `.codex/skills`, `.cursor/skills`, `.opencode/skills`, `.agents/skills`) are symlinks to `../.skills`, never copies: one source of truth, every harness sees the same skill, and supporting a new harness costs exactly one symlink. See `dkorolev/beautiful-skills` for the authoring pattern and `scsh installskills` for the wiring that sets the aliases up in a consumer repo.
