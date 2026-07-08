@@ -193,3 +193,21 @@
 - **The human-perspective test is itself a skill.** Wire the same Markdown as a skill in the local repository, so any coding agent — on any harness — can execute it end to end and report the rubric. "Have your agent run `TEST-<WHAT>.md`" is the entire test-execution story, identical for a human following along, an agent invoked by hand, and a CI gate.
 
 - **Skills live once, under `.skills/`; harnesses reach them through symlink aliases.** Each skill is a self-contained directory — `.skills/<name>/SKILL.md` plus its scripts — complete on its own and deployable by copying that directory alone. The per-harness discovery locations (`.claude/skills`, `.codex/skills`, `.cursor/skills`, `.opencode/skills`, `.agents/skills`) are symlinks to `../.skills`, never copies: one source of truth, every harness sees the same skill, and supporting a new harness costs exactly one symlink. See `dkorolev/beautiful-skills` for the authoring pattern and `scsh installskills` for the wiring that sets the aliases up in a consumer repo.
+
+## 13. State & Atomicity
+
+- **No user-facing output is ever in limbo.** Every state observable through any channel — terminal, TUI, web UI, API, HTTP endpoint, log line — is a *valid, complete* state. There is no window in which a thing exists but has no state, sits between two states, or is half-created. If a reader can observe it, what they observe is legal. This is the whole rule; everything below is how it is kept true.
+
+- **The observable state changes atomically, or not at all.** A state transition is a single commit: an observer reads either the before-state or the after-state, never a torn value in between, never both. The write that creates an entity and the write that gives it its initial state are the *same* transaction — you never `INSERT` a row and then `UPDATE` it into its first state, because between those two writes any channel could catch it stateless. It is born already in state one.
+
+- **The moment a job starts, it is in its first state.** Start a job and immediately query it from any channel — UI, terminal, API, HTTP — and you see the first state, full stop. "Started but not yet in step one" is not a state that exists to be observed; make it unrepresentable, in time as well as in type.
+
+- **This extends §1 from the type to the timeline.** §1 makes illegal states unrepresentable in the *shape* of the data; this makes them unrepresentable in its *observable history*. Same discipline — remove the illegal state so no check has to catch it — applied to *when* a value can be seen, not just *what* it can be.
+
+- **One source of truth means channels cannot disagree.** Every channel renders the same committed state, so the terminal, the web UI, and the API are never ahead of or behind one another by construction. Consistency across surfaces is a property of reading from one committed source, not a reconciliation step bolted on afterward.
+
+- **A failed operation leaves nothing behind.** Per §5, a start that fails commits nothing: no half-created job, no orphaned id, no entity stuck in a phantom pre-first state. Creation succeeds whole or rolls back whole — partial creation is never a thing an observer, or a retry, has to reason about.
+
+- **Applies at every scale.** From a trivial monitorable job to a large multi-component process, the rule is identical: the atomic-commit boundary is where an operation becomes visible, and it becomes visible whole or not at all. A multi-step, multi-service process is still exposed as a sequence of complete committed states — never as a glimpse of its own wiring mid-flight.
+
+- **Ties to §2's async ids.** The id §2 returns immediately for an async operation already denotes a job in its first state; handing back an id for a not-yet-initialized job would reintroduce exactly the limbo this section forbids. `wait`/`status` then observe a clean progression of complete states through to a terminal one.
