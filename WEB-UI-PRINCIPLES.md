@@ -20,6 +20,8 @@
 
 - **Nothing jumps.** A layout shift steals the reader's place — and sometimes their click. Pinned chrome stays one row and controls reserve stable space; menus, messages, and disclosures overlay or scroll away.
 
+- **Preserve DOM identity across updates.** Mutate an existing element in place; recreate it only when its identity truly changes or its implementation cannot accept the required update. Replacement destroys browser-owned state — selection, focus, fullscreen, playback, and scroll position — and makes stable content jump.
+
 - **Context populates reserved space without changing geometry.** Pinned chrome may fill as the user scrolls, but its dimensions never move.
 
 - **Stabilize the point of a direct, local interaction** when opening or closing inline UI. Do not fight ordinary scrolling with global compensation.
