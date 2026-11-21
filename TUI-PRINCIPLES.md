@@ -6,7 +6,7 @@
 
 ## 1. The maxim
 
-- **Every operation a person can run is on the board.** They reach it with the arrow keys and Enter. They do not have to already know the spelling. A program still runs one command and exits (`ENG-PRINCIPLES` §16); the board is the person's way through the same catalog.
+- **Every operation a person can run is on the board.** They reach it with the arrow keys and Enter. They do not have to already know the spelling. A value the service already has is a list of names. When that list is a command of the account, the board fetches it first, shows a spinner, and then offers the names. A program still runs one command and exits (`ENG-PRINCIPLES` §16); the board is the person's way through the same catalog.
 
 - **Up and down move. Right or Enter opens. Left or Esc steps back.** A service opens onto the accounts this person may use. An account opens onto its commands. Search lists matching names first and matching help under that, and a name match is not repeated.
 
@@ -23,6 +23,8 @@
 - **Typing starts a search. It does not extend a name they already selected.** Once the box holds a highlighted name, the next character narrows the list from that character. Backspace edits the text and narrows again.
 
 - **An open value stays a field.** A message, a new secret, a key being added for the first time: there is no list, because the service does not have it yet. When a list does exist beside that field, it is the values already stored, and a typed value that matches none of them is still sent.
+
+- **A field that an account can list is loaded before it is offered.** On a command of an account (`slack work post`), a field whose name is the list (`channels` fills `CHANNEL`) runs that account's list command first. The board shows a spinner while the list is fetched, then offers the names. The same list is kept for the rest of the session. Each row of the list document has `name`, and that string is the choice. An empty or failed list leaves the field as one the person can type. The fetch is the list command, checked like any other command.
 
 ## 3. Do not draw an empty negative
 
